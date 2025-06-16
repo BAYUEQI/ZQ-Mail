@@ -1,40 +1,9 @@
 <p align="center">
   <img src="public/icons/icon-192x192.png" alt="MoeMail Logo" width="100" height="100">
-  <h1 align="center">MoeMail</h1>
+  <h1 align="center">ZQ-Mail</h1>
 </p>
 
-<p align="center">
-  一个基于 NextJS + Cloudflare 技术栈构建的可爱临时邮箱服务🎉
-</p>
 
-<p align="center">
-  <a href="#在线演示">在线演示</a> •
-  <a href="#特性">特性</a> •
-  <a href="#技术栈">技术栈</a> •
-  <a href="#本地运行">本地运行</a> •
-  <a href="#部署">部署</a> •
-  <a href="#邮箱域名配置">邮箱域名配置</a> •
-  <a href="#权限系统">权限系统</a> •
-  <a href="#系统设置">系统设置</a> •
-  <a href="#Webhook 集成">Webhook 集成</a> •
-  <a href="#OpenAPI">OpenAPI</a> •
-  <a href="#环境变量">环境变量</a> •
-  <a href="#Github OAuth App 配置">Github OAuth App 配置</a> •
-  <a href="#贡献">贡献</a> •
-  <a href="#许可证">许可证</a> •
-  <a href="#交流群">交流群</a> •
-  <a href="#支持">支持</a>
-</p>
-
-## 在线演示
-[https://moemail.app](https://moemail.app)
-
-![首页](https://pic.otaku.ren/20241209/AQADwsUxG9k1uVZ-.jpg "首页")
-
-
-![邮箱](https://pic.otaku.ren/20241209/AQADw8UxG9k1uVZ-.jpg "邮箱")
-
-![个人中心](https://pic.otaku.ren/20241227/AQADVsIxG7OzcFd-.jpg "个人中心")
 
 ## 特性
 
@@ -62,87 +31,6 @@
 - **邮件处理**: [Cloudflare Email Workers](https://developers.cloudflare.com/email-routing/)
 - **类型安全**: [TypeScript](https://www.typescriptlang.org/)
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
-
-## 本地运行
-
-### 前置要求
-
-- Node.js 18+
-- Pnpm
-- Wrangler CLI
-- Cloudflare 账号
-
-### 安装
-
-1. 克隆仓库：
-```bash
-git clone https://github.com/beilunyang/moemail.git
-cd moemail
-```
-
-2. 安装依赖：
-```bash
-pnpm install
-```
-
-3. 设置 wrangler：
-```bash
-cp wrangler.example.json wrangler.json
-cp wrangler.email.example.json wrangler.email.json
-cp wrangler.cleanup.example.json wrangler.cleanup.json
-```
-设置 Cloudflare D1 数据库名以及数据库 ID
-
-4. 设置环境变量：
-```bash
-cp .env.example .env.local
-```
-设置 AUTH_GITHUB_ID, AUTH_GITHUB_SECRET, AUTH_SECRET
-
-5. 创建本地数据库表结构
-```bash
-pnpm db:migrate-local
-```
-
-### 开发
-
-1. 启动开发服务器：
-```bash
-pnpm dev
-```
-
-2. 测试邮件 worker：
-目前无法本地运行并测试，请使用 wrangler 部署邮件 worker 并测试
-```bash
-pnpm deploy:email
-```
-
-3. 测试清理 worker：
-```bash
-pnpm dev:cleanup
-pnpm test:cleanup
-```
-
-4. 生成 Mock 数据（邮箱以及邮件消息）
-```bash
-pnpm generate-test-data
-```
-## 部署
-
-### 视频版保姆级部署教程
-https://www.bilibili.com/video/BV19wrXY2ESM/
-
-### 本地 Wrangler 部署
-1. 创建 .env 文件
-```bash
-cp .env.example .env
-```
-2. 在 .env 文件中设置[环境变量](#环境变量)
-
-3. 运行部署脚本
-```bash
-pnpm dlx tsx ./scripts/deploy/index.ts
-```
 
 ### Github Actions 部署
 
@@ -182,16 +70,11 @@ pnpm dlx tsx ./scripts/deploy/index.ts
 
 3. 部署进度可以在仓库的 Actions 标签页查看
 
-#### 注意事项
-- 确保所有 Secrets 都已正确设置
-- 使用 tag 触发时，tag 必须以 `v` 开头（例如：v1.0.0）
-
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/beilunyang/moemail)
 
 
 ## 邮箱域名配置
 
-在 MoeMail 个人中心页面，可以配置网站的邮箱域名，支持多域名配置，多个域名用逗号分隔
+在个人中心页面，可以配置网站的邮箱域名，支持多域名配置，多个域名用逗号分隔
 ![邮箱域名配置](https://pic.otaku.ren/20241227/AQAD88AxG67zeVd-.jpg "邮箱域名配置")
 
 ### Cloudflare 邮件路由配置
@@ -546,42 +429,3 @@ const data = await res.json();
 - 设置 `Homepage URL` 为 `https://<your-domain>`
 - 设置 `Authorization callback URL` 为 `https://<your-domain>/api/auth/callback/github`
 
-
-## 贡献
-
-欢迎提交 Pull Request 或者 Issue来帮助改进这个项目
-
-## 许可证
-
-本项目采用 [MIT](LICENSE) 许可证
-
-## 交流
-<table>
-  <tr style="max-width: 360px">
-    <td>
-      <img src="https://pic.otaku.ren/20250309/AQADAcQxGxQjaVZ-.jpg" />
-    </td>
-    <td>
-      <img src="https://pic.otaku.ren/20250309/AQADCMQxGxQjaVZ-.jpg" />
-    </td>
-  </tr>
-  <tr style="max-width: 360px">
-    <td>
-      关注公众号，了解更多项目进展以及AI，区块链，独立开发资讯
-    </td>
-    <td>
-      添加微信，备注 "MoeMail" 拉你进微信交流群
-    </td>
-  </tr>
-</table>
-
-## 支持
-
-如果你喜欢这个项目，欢迎给它一个 Star ⭐️
-或者进行赞助
-<br />
-<br />
-<img src="https://pic.otaku.ren/20240212/AQADPrgxGwoIWFZ-.jpg" style="width: 400px;"/>
-<br />
-<br />
-<a href="https://www.buymeacoffee.com/beilunyang" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="width: 400px;" ></a>
