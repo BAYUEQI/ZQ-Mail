@@ -78,14 +78,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="MoeMail" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-K29Q7HLBMY"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-
-          gtag('config', 'G-K29Q7HLBMY');
-        </script>        
       </head>
       <body 
         className={cn(
