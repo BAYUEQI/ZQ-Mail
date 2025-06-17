@@ -25,7 +25,7 @@ export default async function Home() {
                   </span>
                 </h1>
                 <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 tracking-wide">
-                  临时邮箱服务，不再被垃圾邮箱苦恼
+                  支持z-q.ip-ddns.com/qizou.dpdns.org两种后缀
                 </p>
               </div>
 
