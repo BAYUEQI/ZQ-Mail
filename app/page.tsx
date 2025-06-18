@@ -25,7 +25,7 @@ export default async function Home() {
                   </span>
                 </h1>
                 <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 tracking-wide">
-                  支持z-q.ip-ddns.com/qizou.dpdns.org两种后缀
+                  支持zouqimail.dpdns.org/z-q.ip-ddns.com两种后缀
                 </p>
               </div>
 
