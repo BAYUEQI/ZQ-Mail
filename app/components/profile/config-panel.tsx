@@ -105,6 +105,9 @@ export function ConfigPanel() {
               onChange={(e) => setEmailDomains(e.target.value)}
               placeholder="多个域名用逗号分隔，如: moemail.app,bitibiti.com"
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              注意：zoumail.dpdns.org 和 z-q.ip-ddns.org 这两个后缀已固定可用，无需在此配置
+            </p>
           </div>
         </div>
 
