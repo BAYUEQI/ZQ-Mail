@@ -97,7 +97,8 @@ export function ConfigPanel() {
       return
     }
 
-    const updatedDomains = emailDomains ? `${emailDomains},${newDomain.trim()}` : newDomain.trim()
+    const newDomainsArray = [...emailDomainsArray, newDomain.trim()]
+    const updatedDomains = newDomainsArray.join(',')
     setEmailDomains(updatedDomains)
     setNewDomain("")
     
@@ -108,9 +109,8 @@ export function ConfigPanel() {
   }
 
   const removeDomain = (domainToRemove: string) => {
-    const updatedDomains = emailDomainsArray
-      .filter(d => d !== domainToRemove)
-      .join(',')
+    const updatedDomainsArray = emailDomainsArray.filter(d => d !== domainToRemove)
+    const updatedDomains = updatedDomainsArray.join(',')
     setEmailDomains(updatedDomains)
     
     toast({
