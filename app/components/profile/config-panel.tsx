@@ -183,10 +183,6 @@ export function ConfigPanel() {
               </div>
             </div>
           )}
-
-          <p className="text-xs text-muted-foreground">
-            注意：zoumail.dpdns.org 和 z-q.ip-ddns.org 这两个后缀已固定可用，无需在此配置
-          </p>
         </div>
 
         <div className="flex items-center gap-4">
