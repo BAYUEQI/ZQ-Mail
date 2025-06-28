@@ -1,54 +1,106 @@
-import { PERMISSIONS, Role, ROLES } from "@/lib/permissions"
-import { getRequestContext } from "@cloudflare/next-on-pages"
+import { NextResponse } from "next/server"
+import { nanoid } from "nanoid"
+import { createDb } from "@/lib/db"
+import { emails } from "@/lib/schema"
+import { eq, and, gt, sql } from "drizzle-orm"
+import { EXPIRY_OPTIONS } from "@/types/email"
 import { EMAIL_CONFIG } from "@/config"
-import { checkPermission } from "@/lib/auth"
+import { getRequestContext } from "@cloudflare/next-on-pages"
+import { getUserId } from "@/lib/apiKey"
+import { getUserRole } from "@/lib/auth"
+import { ROLES } from "@/lib/permissions"
 
 export const runtime = "edge"
 
-export async function GET() {
-  const env = getRequestContext().env
-  const [defaultRole, emailDomains, adminContact, maxEmails] = await Promise.all([
-    env.SITE_CONFIG.get("DEFAULT_ROLE"),
-    env.SITE_CONFIG.get("EMAIL_DOMAINS"),
-    env.SITE_CONFIG.get("ADMIN_CONTACT"),
-    env.SITE_CONFIG.get("MAX_EMAILS")
-  ])
-
-  return Response.json({
-    defaultRole: defaultRole || ROLES.CIVILIAN,
-    emailDomains: emailDomains || "moemail.app",
-    adminContact: adminContact || "",
-    maxEmails: maxEmails || EMAIL_CONFIG.MAX_ACTIVE_EMAILS.toString()
-  })
-}
-
 export async function POST(request: Request) {
-  const canAccess = await checkPermission(PERMISSIONS.MANAGE_CONFIG)
-
-  if (!canAccess) {
-    return Response.json({
-      error: "权限不足"
-    }, { status: 403 })
-  }
-
-  const { defaultRole, emailDomains, adminContact, maxEmails } = await request.json() as { 
-    defaultRole: Exclude<Role, typeof ROLES.EMPEROR>,
-    emailDomains: string,
-    adminContact: string,
-    maxEmails: string
-  }
-  
-  if (![ROLES.DUKE, ROLES.KNIGHT, ROLES.CIVILIAN].includes(defaultRole)) {
-    return Response.json({ error: "无效的角色" }, { status: 400 })
-  }
-
+  const db = createDb()
   const env = getRequestContext().env
-  await Promise.all([
-    env.SITE_CONFIG.put("DEFAULT_ROLE", defaultRole),
-    env.SITE_CONFIG.put("EMAIL_DOMAINS", emailDomains),
-    env.SITE_CONFIG.put("ADMIN_CONTACT", adminContact),
-    env.SITE_CONFIG.put("MAX_EMAILS", maxEmails)
-  ])
 
-  return Response.json({ success: true })
+  const userId = await getUserId()
+  const userRole = await getUserRole(userId!)
+
+  try {
+    if (userRole !== ROLES.EMPEROR) {
+      const maxEmails = await env.SITE_CONFIG.get("MAX_EMAILS") || EMAIL_CONFIG.MAX_ACTIVE_EMAILS.toString()
+      const activeEmailsCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(emails)
+        .where(
+          and(
+            eq(emails.userId, userId!),
+            gt(emails.expiresAt, new Date())
+          )
+        )
+      
+      if (Number(activeEmailsCount[0].count) >= Number(maxEmails)) {
+        return NextResponse.json(
+          { error: `已达到最大邮箱数量限制 (${maxEmails})` },
+          { status: 403 }
+        )
+      }
+    }
+
+    const { name, expiryTime, domain } = await request.json<{ 
+      name: string
+      expiryTime: number
+      domain: string
+    }>()
+
+    if (!EXPIRY_OPTIONS.some(option => option.value === expiryTime)) {
+      return NextResponse.json(
+        { error: "无效的过期时间" },
+        { status: 400 }
+      )
+    }
+
+    // 检查域名是否在配置的允许列表中
+    const domainString = await env.SITE_CONFIG.get("EMAIL_DOMAINS")
+    const allowedDomains = domainString ? domainString.split(',').map(d => d.trim()).filter(d => d) : ["moemail.app"]
+
+    if (!allowedDomains.includes(domain)) {
+      return NextResponse.json(
+        { error: "无效的域名" },
+        { status: 400 }
+      )
+    }
+
+    const address = `${name || nanoid(8)}@${domain}`
+    const existingEmail = await db.query.emails.findFirst({
+      where: eq(sql`LOWER(${emails.address})`, address.toLowerCase())
+    })
+
+    if (existingEmail) {
+      return NextResponse.json(
+        { error: "该邮箱地址已被使用" },
+        { status: 409 }
+      )
+    }
+
+    const now = new Date()
+    const expires = expiryTime === 0 
+      ? new Date('9999-01-01T00:00:00.000Z')
+      : new Date(now.getTime() + expiryTime)
+    
+    const emailData: typeof emails.$inferInsert = {
+      address,
+      createdAt: now,
+      expiresAt: expires,
+      userId: userId!
+    }
+    
+    const result = await db.insert(emails)
+      .values(emailData)
+      .returning({ id: emails.id, address: emails.address })
+    
+    return NextResponse.json({ 
+      id: result[0].id,
+      email: result[0].address 
+    })
+  } catch (error) {
+    console.error('Failed to generate email:', error)
+    return NextResponse.json(
+      { error: "创建邮箱失败" },
+      { status: 500 }
+    )
+  }
 } 
