@@ -1,6 +1,6 @@
 {
-  "name": "MoeMail",
-  "short_name": "MoeMail",
+  "name": "ZQ-Mail",
+  "short_name": "ZQ-Mail",
   "description": "萌萌哒临时邮箱服务",
   "start_url": "/",
   "display": "standalone",
