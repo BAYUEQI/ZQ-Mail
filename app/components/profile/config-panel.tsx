@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Settings } from "lucide-react"
+import { Settings, Plus, Trash2 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useState, useEffect } from "react"
 import { Role, ROLES } from "@/lib/permissions"
@@ -21,8 +21,11 @@ export function ConfigPanel() {
   const [adminContact, setAdminContact] = useState<string>("")
   const [maxEmails, setMaxEmails] = useState<string>(EMAIL_CONFIG.MAX_ACTIVE_EMAILS.toString())
   const [loading, setLoading] = useState(false)
+  const [newDomain, setNewDomain] = useState("")
   const { toast } = useToast()
 
+  // 解析邮箱域名字符串为数组
+  const emailDomainsArray = emailDomains ? emailDomains.split(',').map(d => d.trim()).filter(d => d) : []
 
   useEffect(() => {
     fetchConfig()
@@ -75,6 +78,47 @@ export function ConfigPanel() {
     }
   }
 
+  const addDomain = () => {
+    if (!newDomain.trim()) {
+      toast({
+        title: "错误",
+        description: "请输入域名",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (emailDomainsArray.includes(newDomain.trim())) {
+      toast({
+        title: "错误",
+        description: "该域名已存在",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const updatedDomains = emailDomains ? `${emailDomains},${newDomain.trim()}` : newDomain.trim()
+    setEmailDomains(updatedDomains)
+    setNewDomain("")
+    
+    toast({
+      title: "成功",
+      description: "域名已添加",
+    })
+  }
+
+  const removeDomain = (domainToRemove: string) => {
+    const updatedDomains = emailDomainsArray
+      .filter(d => d !== domainToRemove)
+      .join(',')
+    setEmailDomains(updatedDomains)
+    
+    toast({
+      title: "成功",
+      description: "域名已删除",
+    })
+  }
+
   return (
     <div className="bg-background rounded-lg border-2 border-primary/20 p-6">
       <div className="flex items-center gap-2 mb-6">
@@ -97,18 +141,52 @@ export function ConfigPanel() {
           </Select>
         </div>
 
-        <div className="flex items-center gap-4">
-          <span className="text-sm">邮箱域名:</span>
-          <div className="flex-1">
-            <Input 
-              value={emailDomains}
-              onChange={(e) => setEmailDomains(e.target.value)}
-              placeholder="多个域名用逗号分隔，如: moemail.app,bitibiti.com"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              注意：zoumail.dpdns.org 和 z-q.ip-ddns.org 这两个后缀已固定可用，无需在此配置
-            </p>
+        <div className="space-y-3">
+          <div className="flex items-center gap-4">
+            <span className="text-sm">邮箱域名管理:</span>
+            <div className="flex-1 flex gap-2">
+              <Input 
+                value={newDomain}
+                onChange={(e) => setNewDomain(e.target.value)}
+                placeholder="输入新域名，如: example.com"
+                className="flex-1"
+                onKeyPress={(e) => e.key === 'Enter' && addDomain()}
+              />
+              <Button 
+                onClick={addDomain}
+                size="sm"
+                className="gap-1"
+              >
+                <Plus className="w-4 h-4" />
+                添加
+              </Button>
+            </div>
           </div>
+
+          {emailDomainsArray.length > 0 && (
+            <div className="space-y-2">
+              <span className="text-sm text-muted-foreground">当前配置的域名:</span>
+              <div className="space-y-1">
+                {emailDomainsArray.map((domain, index) => (
+                  <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded">
+                    <span className="flex-1 text-sm">@{domain}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeDomain(domain)}
+                      className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <p className="text-xs text-muted-foreground">
+            注意：zoumail.dpdns.org 和 z-q.ip-ddns.org 这两个后缀已固定可用，无需在此配置
+          </p>
         </div>
 
         <div className="flex items-center gap-4">
