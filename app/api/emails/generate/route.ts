@@ -53,10 +53,11 @@ export async function POST(request: Request) {
       )
     }
 
+    // 检查域名是否在配置的允许列表中
     const domainString = await env.SITE_CONFIG.get("EMAIL_DOMAINS")
-    const domains = domainString ? domainString.split(',') : ["moemail.app"]
+    const allowedDomains = domainString ? domainString.split(',').map(d => d.trim()).filter(d => d) : ["moemail.app"]
 
-    if (!domains || !domains.includes(domain)) {
+    if (!allowedDomains.includes(domain)) {
       return NextResponse.json(
         { error: "无效的域名" },
         { status: 400 }
