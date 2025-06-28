@@ -18,6 +18,12 @@ interface CreateDialogProps {
   onEmailCreated: () => void
 }
 
+// 固定的邮箱后缀选项
+const EMAIL_SUFFIXES = [
+  "zoumail.dpdns.org",
+  "z-q.ip-ddns.org"
+]
+
 export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
   const { config } = useConfig()  
   const [open, setOpen] = useState(false)
@@ -27,6 +33,12 @@ export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
   const [expiryTime, setExpiryTime] = useState(EXPIRY_OPTIONS[1].value.toString())
   const { toast } = useToast()
   const { copyToClipboard } = useCopy()
+
+  // 获取所有可用的域名（固定后缀 + 配置的域名）
+  const getAllAvailableDomains = () => {
+    const configDomains = config?.emailDomainsArray || []
+    return [...EMAIL_SUFFIXES, ...configDomains]
+  }
 
   const generateRandomName = () => setEmailName(nanoid(8))
 
@@ -85,10 +97,14 @@ export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
   }
 
   useEffect(() => {
-    if ((config?.emailDomainsArray?.length ?? 0) > 0) {
-      setCurrentDomain(config?.emailDomainsArray[0] ?? "")
+    // 设置默认后缀为第一个可用选项
+    const availableDomains = getAllAvailableDomains()
+    if (availableDomains.length > 0) {
+      setCurrentDomain(availableDomains[0])
     }
   }, [config])
+
+  const availableDomains = getAllAvailableDomains()
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -110,14 +126,14 @@ export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
               placeholder="输入邮箱名"
               className="flex-1"
             />
-            {(config?.emailDomainsArray?.length ?? 0) > 1 && (
+            {availableDomains.length > 0 && (
               <Select value={currentDomain} onValueChange={setCurrentDomain}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {config?.emailDomainsArray?.map(d => (
-                    <SelectItem key={d} value={d}>@{d}</SelectItem>
+                  {availableDomains.map(domain => (
+                    <SelectItem key={domain} value={domain}>@{domain}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
