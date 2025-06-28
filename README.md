@@ -47,7 +47,7 @@
    - `AUTH_GITHUB_ID`: GitHub OAuth App ID
    - `AUTH_GITHUB_SECRET`: GitHub OAuth App Secret
    - `AUTH_SECRET`: NextAuth Secret，用来加密 session，请设置一个随机字符串
-   - `CUSTOM_DOMAIN`: 网站自定义域名，用于访问 MoeMail (可选， 如果不填, 则会使用 Cloudflare Pages 默认域名)
+   - `CUSTOM_DOMAIN`: 网站自定义域名, 如：your-domain.com (可选， 如果不填, 则会使用 Cloudflare Pages 默认域名)
    - `PROJECT_NAME`: Pages 项目名 （可选，如果不填，则为 moemail） 
    - `DATABASE_NAME`: D1 数据库名称 (可选，如果不填，则为 moemail-db)
    - `KV_NAMESPACE_NAME`: Cloudflare KV namespace 名称，用于存储网站配置 （可选，如果不填，则为 moemail-kv）
@@ -74,7 +74,26 @@
 
 ## 邮箱域名配置
 
-在个人中心页面，可以配置网站的邮箱域名，支持多域名配置，多个域名用逗号分隔
+在个人中心页面，可以配置网站的邮箱域名，支持多域名配置。
+
+### 邮箱后缀管理
+
+**皇帝**角色可以在个人中心页面管理所有邮箱后缀：
+
+1. 进入个人中心页面
+2. 在"邮箱域名管理"部分：
+   - 输入新的域名（如：`example.com`、`zoumail.dpdns.org`、`z-q.ip-ddns.org`）
+   - 点击"添加"按钮
+   - 可以查看当前配置的所有域名
+   - 点击删除按钮可以移除不需要的域名
+3. 保存设置后，新域名将立即生效
+
+### 创建邮箱时的后缀选择
+
+用户在创建新邮箱时，可以从管理员在配置面板中添加的所有后缀中选择。
+
+**注意**：所有邮箱后缀都需要在配置面板中配置，包括之前固定的 `zoumail.dpdns.org` 和 `z-q.ip-ddns.org` 后缀。系统不再提供默认的域名。
+
 ![邮箱域名配置](https://pic.otaku.ren/20241227/AQAD88AxG67zeVd-.jpg "邮箱域名配置")
 
 ### Cloudflare 邮件路由配置
@@ -84,9 +103,9 @@
 1. 登录 [Cloudflare 控制台](https://dash.cloudflare.com/)
 2. 选择您的域名
 3. 点击左侧菜单的 "电子邮件" -> "电子邮件路由"
-4. 如果显示 “电子邮件路由当前被禁用，没有在路由电子邮件”，请点击 "启用电子邮件路由"
+4. 如果显示 "电子邮件路由当前被禁用，没有在路由电子邮件"，请点击 "启用电子邮件路由"
 ![启用电子邮件路由](https://pic.otaku.ren/20241223/AQADNcQxG_K0SVd-.jpg "启用电子邮件路由")
-5. 点击后，会提示你添加电子邮件路由 DNS 记录，点击 “添加记录并启用” 即可
+5. 点击后，会提示你添加电子邮件路由 DNS 记录，点击 "添加记录并启用" 即可
 ![添加电子邮件路由 DNS 记录](https://pic.otaku.ren/20241223/AQADN8QxG_K0SVd-.jpg "添加电子邮件路由 DNS 记录")
 6. 配置路由规则：
    - Catch-all 地址: 启用 "Catch-all"
@@ -187,7 +206,7 @@ X-Webhook-Event: new_message
   "content": "邮件文本内容",
   "html": "邮件HTML内容",
   "receivedAt": "2024-01-01T12:00:00.000Z",
-  "toAddress": "your-email@moemail.app"
+  "toAddress": "your-email@your-domain.com"
 }
 ```
 
@@ -238,7 +257,7 @@ GET /api/config
 ```json
 {
   "defaultRole": "CIVILIAN",
-  "emailDomains": "moemail.app,example.com",
+  "emailDomains": "your-domain.com,example.com",
   "adminContact": "admin@example.com",
   "maxEmails": "10"
 }
@@ -257,7 +276,7 @@ Content-Type: application/json
 {
   "name": "test",
   "expiryTime": 3600000,
-  "domain": "moemail.app"
+  "domain": "your-domain.com"
 }
 ```
 参数说明：
@@ -269,12 +288,18 @@ Content-Type: application/json
 ```json
 {
   "id": "email-uuid-123",
-  "email": "test@moemail.app"
+  "address": "test@your-domain.com",
+  "createdAt": "2024-01-01T12:00:00.000Z",
+  "expiresAt": "2024-01-02T12:00:00.000Z",
+  "userId": "user-uuid-456"
 }
 ```
 响应字段说明：
 - `id`: 邮箱的唯一标识符
-- `email`: 创建的邮箱地址
+- `address`: 创建的邮箱地址
+- `createdAt`: 邮箱创建时间
+- `expiresAt`: 邮箱有效期
+- `userId`: 用户唯一标识符
 
 #### 获取邮箱列表
 ```http
@@ -289,7 +314,7 @@ GET /api/emails?cursor=xxx
   "emails": [
     {
       "id": "email-uuid-123",
-      "address": "test@moemail.app",
+      "address": "test@your-domain.com",
       "createdAt": "2024-01-01T12:00:00.000Z",
       "expiresAt": "2024-01-02T12:00:00.000Z",
       "userId": "user-uuid-456"
@@ -388,7 +413,7 @@ curl -X POST https://your-domain.com/api/emails/generate \
   -d '{
     "name": "test",
     "expiryTime": 3600000,
-    "domain": "moemail.app"
+    "domain": "your-domain.com"
   }'
 ```
 
@@ -418,7 +443,7 @@ const data = await res.json();
 - `DATABASE_ID`: D1 数据库 ID (可选, 如果不填, 则会自动通过 Cloudflare API 获取)
 - `KV_NAMESPACE_NAME`: Cloudflare KV namespace 名称，用于存储网站配置
 - `KV_NAMESPACE_ID`: Cloudflare KV namespace ID，用于存储网站配置 （可选， 如果不填, 则会自动通过 Cloudflare API 获取）
-- `CUSTOM_DOMAIN`: 网站自定义域名, 如：moemail.app (可选， 如果不填, 则会使用 Cloudflare Pages 默认域名)
+- `CUSTOM_DOMAIN`: 网站自定义域名, 如：your-domain.com (可选， 如果不填, 则会使用 Cloudflare Pages 默认域名)
 - `PROJECT_NAME`: Pages 项目名 （可选，如果不填，则为 moemail） 
 
 ## Github OAuth App 配置
