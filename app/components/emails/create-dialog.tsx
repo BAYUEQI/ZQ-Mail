@@ -18,12 +18,6 @@ interface CreateDialogProps {
   onEmailCreated: () => void
 }
 
-// 固定的邮箱后缀选项
-const EMAIL_SUFFIXES = [
-  "zoumail.dpdns.org",
-  "z-q.ip-ddns.org"
-]
-
 export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
   const { config } = useConfig()  
   const [open, setOpen] = useState(false)
@@ -34,10 +28,9 @@ export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
   const { toast } = useToast()
   const { copyToClipboard } = useCopy()
 
-  // 获取所有可用的域名（固定后缀 + 配置的域名）
+  // 获取所有可用的域名（从配置中获取）
   const getAllAvailableDomains = () => {
-    const configDomains = config?.emailDomainsArray || []
-    return [...EMAIL_SUFFIXES, ...configDomains]
+    return config?.emailDomainsArray || []
   }
 
   const generateRandomName = () => setEmailName(nanoid(8))
