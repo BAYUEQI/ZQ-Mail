@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
     // 检查域名是否在配置的允许列表中
     const domainString = await env.SITE_CONFIG.get("EMAIL_DOMAINS")
-    const allowedDomains = domainString ? domainString.split(',').map(d => d.trim()).filter(d => d) : ["moemail.app"]
+    const allowedDomains = domainString ? domainString.split(',').map(d => d.trim()).filter(d => d) : []
 
     if (!allowedDomains.includes(domain)) {
       return NextResponse.json(
