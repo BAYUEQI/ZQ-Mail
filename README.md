@@ -41,18 +41,35 @@
 
 #### 部署步骤
 
-1. 在 GitHub 仓库设置中添加以下 Secrets：
-   - `CLOUDFLARE_API_TOKEN`: Cloudflare API 令牌(开放D1数据库权限)
-   - `CLOUDFLARE_ACCOUNT_ID`: Cloudflare 账户 ID
-   - `AUTH_GITHUB_ID`: GitHub OAuth App ID
-   - `AUTH_GITHUB_SECRET`: GitHub OAuth App Secret
-   - `AUTH_SECRET`: NextAuth Secret，用来加密 session，请设置一个随机字符串
-   - `CUSTOM_DOMAIN`: 网站自定义域名, 如：your-domain.com (可选， 如果不填, 则会使用 Cloudflare Pages 默认域名)
-   - `PROJECT_NAME`: Pages 项目名 （可选，如果不填，则为 moemail） 
-   - `DATABASE_NAME`: D1 数据库名称 (可选，如果不填，则为 moemail-db)
-   - `KV_NAMESPACE_NAME`: Cloudflare KV namespace 名称，用于存储网站配置 （可选，如果不填，则为 moemail-kv）
+##### 1. 绑定变量
 
-2. 选择触发方式：
+本项目使用以下环境变量：
+
+###### 认证相关(cloudflare绑定这些变量)
+- `AUTH_GITHUB_ID`: GitHub OAuth App ID
+- `AUTH_GITHUB_SECRET`: GitHub OAuth App Secret
+- `AUTH_SECRET`: NextAuth Secret，用来加密 session，请设置一个随机字符串
+
+###### Cloudflare 配置(github绑定这些变量)
+- `CLOUDFLARE_API_TOKEN`: Cloudflare API Token
+- `CLOUDFLARE_ACCOUNT_ID`: Cloudflare Account ID
+- `DATABASE_NAME`: D1 数据库名称
+- `DATABASE_ID`: D1 数据库 ID (可选, 如果不填, 则会自动通过 Cloudflare API 获取)
+- `KV_NAMESPACE_NAME`: Cloudflare KV namespace 名称，用于存储网站配置
+- `KV_NAMESPACE_ID`: Cloudflare KV namespace ID，用于存储网站配置 （可选， 如果不填, 则会自动通过 Cloudflare API 获取）
+- `CUSTOM_DOMAIN`: 网站自定义域名, 如：your-domain.com (可选， 如果不填, 则会使用 Cloudflare Pages 默认域名)
+- `PROJECT_NAME`: Pages 项目名 （可选，如果不填，则为 moemail） 
+
+###### github OAuth App 配置
+
+- 登录 [Github Developer](https://github.com/settings/developers) 创建一个新的 OAuth App
+- 生成一个新的 `Client ID` 和 `Client Secret`
+- 设置 `Application name` 为 `<your-app-name>`
+- 设置 `Homepage URL` 为 `https://<your-domain>`
+- 设置 `Authorization callback URL` 为 `https://<your-domain>/api/auth/callback/github`
+
+
+##### 2. 选择触发方式：
 
    **方式一：推送 tag 触发**
    ```bash
@@ -427,30 +444,4 @@ const res = await fetch('https://your-domain.com/api/emails/your-email-id', {
 const data = await res.json();
 ```
 
-## 环境变量
-
-本项目使用以下环境变量：
-
-### 认证相关
-- `AUTH_GITHUB_ID`: GitHub OAuth App ID
-- `AUTH_GITHUB_SECRET`: GitHub OAuth App Secret
-- `AUTH_SECRET`: NextAuth Secret，用来加密 session，请设置一个随机字符串
-
-### Cloudflare 配置
-- `CLOUDFLARE_API_TOKEN`: Cloudflare API Token
-- `CLOUDFLARE_ACCOUNT_ID`: Cloudflare Account ID
-- `DATABASE_NAME`: D1 数据库名称
-- `DATABASE_ID`: D1 数据库 ID (可选, 如果不填, 则会自动通过 Cloudflare API 获取)
-- `KV_NAMESPACE_NAME`: Cloudflare KV namespace 名称，用于存储网站配置
-- `KV_NAMESPACE_ID`: Cloudflare KV namespace ID，用于存储网站配置 （可选， 如果不填, 则会自动通过 Cloudflare API 获取）
-- `CUSTOM_DOMAIN`: 网站自定义域名, 如：your-domain.com (可选， 如果不填, 则会使用 Cloudflare Pages 默认域名)
-- `PROJECT_NAME`: Pages 项目名 （可选，如果不填，则为 moemail） 
-
-## Github OAuth App 配置
-
-- 登录 [Github Developer](https://github.com/settings/developers) 创建一个新的 OAuth App
-- 生成一个新的 `Client ID` 和 `Client Secret`
-- 设置 `Application name` 为 `<your-app-name>`
-- 设置 `Homepage URL` 为 `https://<your-domain>`
-- 设置 `Authorization callback URL` 为 `https://<your-domain>/api/auth/callback/github`
 
