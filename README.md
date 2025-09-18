@@ -42,7 +42,7 @@
 #### 部署步骤
 
 1. 在 GitHub 仓库设置中添加以下 Secrets：
-   - `CLOUDFLARE_API_TOKEN`: Cloudflare API 令牌
+   - `CLOUDFLARE_API_TOKEN`: Cloudflare API 令牌(开放D1数据库权限)
    - `CLOUDFLARE_ACCOUNT_ID`: Cloudflare 账户 ID
    - `AUTH_GITHUB_ID`: GitHub OAuth App ID
    - `AUTH_GITHUB_SECRET`: GitHub OAuth App Secret
